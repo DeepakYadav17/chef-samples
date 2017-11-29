@@ -1,4 +1,4 @@
-# learn_chef_httpd
+# Installing Tomcat and MySQL
 
 TODO: Enter the cookbook description here.
 
