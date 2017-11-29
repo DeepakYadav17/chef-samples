@@ -31,6 +31,11 @@ execute 'extract tomcat' do
   command 'tar -xvf apache-tomcat-8.0.47.tar.gz'
 end
 
+execute 'start tomcat server' do
+  cwd '/opt/apache-tomcat-8.0.47/bin/'
+  command './startup.sh'
+end
+
 remote_file '/opt/apache-tomcat-8.0.47/webapps/sample.war' do
   mode '0644'
   source 'https://tomcat.apache.org/tomcat-6.0-doc/appdev/sample/sample.war'
