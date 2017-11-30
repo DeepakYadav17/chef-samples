@@ -1,23 +1,3 @@
-#
-# Cookbook:: learn_chef_httpd
-# Recipe:: default
-#
-# Copyright:: 2017, The Authors, All Rights Reserved.
-
-#package 'httpd'
-
-#service 'httpd' do
-#  action [:enable, :start]
-#end
-
-#template '/var/www/html/index.html' do
-#  source 'index.html.erb'
-#end
-
-#execute 'java install' do
-#  command 'yum install java -y'
-#end
-
 # Install Tomcat 8.0.47 to the default location
 remote_file '/opt/apache-tomcat-8.0.47.tar.gz' do
   source 'http://archive.apache.org/dist/tomcat/tomcat-8/v8.0.47/bin/apache-tomcat-8.0.47.tar.gz'
@@ -49,15 +29,7 @@ end
 execute 'install mysql client' do
   command 'yum install -y mysql'
 end
-  
 
-
-
-
-
-
-#tomcat_install 'helloworld' do
-#  tarball_uri 'http://archive.apache.org/dist/tomcat/tomcat-8/v8.0.47/bin/apache-tomcat-8.0.47.tar.gz'
-#  tomcat_user 'cool_user'
-#  tomcat_group 'cool_group'
-#end
+execute 'start mysqld server' do
+  command 'service mysqld start'
+end
