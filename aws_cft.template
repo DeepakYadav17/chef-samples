@@ -1,0 +1,143 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "AWS Service Catalog sample template. Creates an Amazon EC2 instance running the Amazon Linux AMI. The AMI is chosen based on the region in which the stack is run. This example creates an EC2 security group for the instance to give you SSH access. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+
+  "Parameters": {
+    "KeyName": {
+      "Description": "Name of an existing EC2 key pair for SSH access to the EC2 instance.",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+
+    "InstanceType": {
+      "Description": "EC2 instance type.",
+      "Type": "String",
+      "Default": "t2.micro",
+      "AllowedValues": ["t2.micro"]
+    },
+
+    "SSHLocation": {
+      "Description": "The IP address range that can SSH to the EC2 instance.",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x."
+    }
+  },
+
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [{
+        "Label": {
+          "default": "Instance configuration"
+        },
+        "Parameters": ["InstanceType"]
+      }, {
+        "Label": {
+          "default": "Security configuration"
+        },
+        "Parameters": ["KeyName", "SSHLocation"]
+      }],
+      "ParameterLabels": {
+        "InstanceType": {
+          "default": "Server size:"
+        },
+        "KeyName": {
+          "default": "Key pair:"
+        },
+        "SSHLocation": {
+          "default": "CIDR range:"
+        }
+      }
+    }
+  },
+
+  "Mappings": {
+    "AWSRegionArch2AMI": {
+      "us-east-2": {
+        "HVM64": "ami-aa1b34cf"
+      }
+    }
+
+  },
+
+  "Resources": {
+    "EC2Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroups": [{
+          "Ref": "InstanceSecurityGroup"
+        }],
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "ImageId": {
+          "Fn::FindInMap": ["AWSRegionArch2AMI", {
+            "Ref": "AWS::Region"
+          }, "HVM64"]
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": ["", [
+              "#!/bin/bash \n",
+              "pwd \n",
+              "cd /opt \n",
+              "# Install the chef development kit \n",
+              "wget https://packages.chef.io/files/stable/chefdk/2.3.4/el/7/chefdk-2.3.4-1.el7.x86_64.rpm \n",
+               "chmod 755 chefdk-2.3.4-1.el7.x86_64.rpm \n",
+              "rpm -i chefdk-2.3.4-1.el7.x86_64.rpm \n",
+              "export PATH=/opt/chefdk/embedded/bin/:$PATH \n",
+              "ruby -v \n",
+              "yum install git -y \n",
+              "git clone https://github.com/DeepakYadav17/chef-samples.git \n",
+              "cd chef-samples \n",
+              "chef-client --local-mode hello.rb \n",
+              "chef-client --local-mode --override-runlist tomcat_and_mysql \n",
+              "\n"
+            ]]
+          }
+        }
+      }
+    },
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable SSH access via port 22",
+        "SecurityGroupIngress": [
+         {
+             "IpProtocol" : "tcp",
+             "FromPort" : "8080",
+             "ToPort" : "8080",
+             "CidrIp" : "0.0.0.0/0"
+         },
+         {
+          "IpProtocol": "tcp",
+          "FromPort": "22",
+          "ToPort": "22",
+          "CidrIp": {
+            "Ref": "SSHLocation"
+          }
+        }]
+      }
+    }
+  },
+  "Outputs": {
+    "PublicDNSName": {
+      "Description": "Public DNS name of the new EC2 instance",
+      "Value": {
+        "Fn::GetAtt": ["EC2Instance", "PublicDnsName"]
+      }
+    },
+    "PublicIPAddress": {
+      "Description": "Public IP address of the new EC2 instance",
+      "Value": {
+        "Fn::GetAtt": ["EC2Instance", "PublicIp"]
+      }
+    }
+  }
+}
