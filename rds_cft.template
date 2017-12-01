@@ -1,0 +1,66 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "5ded1401-aaa7-4480-80d8-bdc4b4de2b87": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 430,
+                    "y": 40
+                },
+                "z": 1,
+                "parent": "e05251fa-6bbf-4251-99b2-fa1232a75e87"
+            },
+            "e05251fa-6bbf-4251-99b2-fa1232a75e87": {
+                "size": {
+                    "width": 140,
+                    "height": 140
+                },
+                "position": {
+                    "x": 420,
+                    "y": 20
+                },
+                "z": 0,
+                "embeds": [
+                    "5ded1401-aaa7-4480-80d8-bdc4b4de2b87"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "RDSDBSG3L5J9": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                  "DBSubnetGroupDescription" : "DB Subnet Group",
+      "SubnetIds" : ["subnet-86f231ef", "subnet-b03e21c8", "subnet-45615d0f"],
+      "Tags" : [ {"Key" : "Team", "Value" : "DevOps"} ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "e05251fa-6bbf-4251-99b2-fa1232a75e87"
+                }
+            }
+        },
+        "DevSecOpsMySQLDB": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBSubnetGroupName": {
+                    "Ref": "RDSDBSG3L5J9"
+                },
+                "AllocatedStorage": "5",
+                "DBInstanceClass": "db.t2.micro",
+                "Engine": "MySQL",
+                "MasterUsername": "MyName",
+                "MasterUserPassword": "MyPassword"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "5ded1401-aaa7-4480-80d8-bdc4b4de2b87"
+                }
+            }
+        }
+    }
+}
